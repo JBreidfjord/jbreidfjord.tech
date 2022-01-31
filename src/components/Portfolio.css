@@ -1,0 +1,9 @@
+.portfolio {
+  padding: 0 8em 2em;
+}
+
+.portfolio .project-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
+  grid-gap: 1em;
+}
