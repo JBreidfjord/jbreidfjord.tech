@@ -1,0 +1,18 @@
+[
+  {
+    "title": "Project 1",
+    "subtitle": "This is a subtitle for project 1",
+    "description": "This is the description of the project. It's a bit long, but it's not too long. It's not too short either. It's just about the right length.",
+    "image": "assets/images/project1.png",
+    "links": [
+      {
+        "icon": "github",
+        "url": "https://github.com/user/project1"
+      },
+      {
+        "icon": "youtube",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      }
+    ]
+  }
+]
