@@ -1,0 +1,21 @@
+.home .info-container {
+  max-width: 720px;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.home .info-container .headshot {
+  margin: 2em;
+  max-width: 40%;
+  border-radius: 50%;
+  border: 0.5em solid #fff;
+}
+
+.home .info-container .info {
+  display: block;
+}
+
+.home .info-container .links a {
+  padding: 0.1em;
+}
