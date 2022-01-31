@@ -25,9 +25,7 @@ export default function Portfolio() {
       <h2>Portfolio</h2>
       <div className="project-list">
         {portfolio.map((project, i) => (
-          <div className="project" key={i}>
-            <Project project={project} getIconComponent={getIconComponent} />
-          </div>
+          <Project key={i} project={project} getIconComponent={getIconComponent} />
         ))}
       </div>
     </div>

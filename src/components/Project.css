@@ -1,0 +1,18 @@
+.portfolio .project {
+  background-color: #1a2632;
+  margin: 0;
+  padding: 1em;
+  border-radius: 0.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.portfolio .project .links {
+  margin-top: auto;
+}
+
+.portfolio .project .links a {
+  padding: 0.1em;
+}
