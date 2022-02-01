@@ -1,18 +1,66 @@
 [
   {
-    "title": "Project 1",
-    "subtitle": "This is a subtitle for project 1",
-    "description": "This is the description of the project. It's a bit long, but it's not too long. It's not too short either. It's just about the right length.",
-    "image": "assets/images/project1.png",
+    "title": "Evolution Simulation",
+    "subtitle": "Neuroevolution in Rust",
+    "description": "Implementation of a neural network and genetic algorithm in Rust. Creatures, powered by a neural network, must find food to survive and the strongest reproduce. Over time, the genetic algorithm will train the neural networks to find the best solution.",
     "links": [
       {
         "icon": "github",
-        "url": "https://github.com/user/project1"
+        "url": "https://github.com/JBreidfjord/evolution-simulation"
       },
       {
-        "icon": "youtube",
-        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        "icon": "link",
+        "url": "https://microcosmic-societies.web.app/"
       }
-    ]
+    ],
+    "langs": ["rust", "react", "javascript"]
+  },
+  {
+    "title": "Particle Simulator",
+    "subtitle": "A simple particle simulator to explore kinetic theory",
+    "description": "Applies concepts from kinetic theory to estimate the pressure of an ideal gas through collisions of the molecules with the container walls.",
+    "links": [
+      {
+        "icon": "github",
+        "url": "https://github.com/JBreidfjord/particle-sim"
+      },
+      {
+        "icon": "link",
+        "url": "https://kineticpressuresim.web.app/"
+      }
+    ],
+    "langs": ["react", "javascript"]
+  },
+  {
+    "title": "Last.FM Data Visualizer",
+    "subtitle": "Visualizing data collected from the Last.FM API",
+    "description": "A web application that allows users to fetch their data from Last.FM then use it to explore a variety of visualizations. Uses the visx library to create highly customized visualizations.",
+    "links": [
+      {
+        "icon": "github",
+        "url": "https://github.com/JBreidfjord/lastfm-data-viz"
+      },
+      {
+        "icon": "link",
+        "url": "https://lastfm-data-viz.web.app/"
+      }
+    ],
+    "langs": ["react", "javascript"]
+  },
+  {
+    "title": "Botfjord",
+    "subtitle": "A chess engine written in Rust",
+    "description": "Monte Carlo Tree Search based chess engine, written in Rust, handling game connections with Python. Utilizes threads to search multiple trees in parallel, significantly improving performance.",
+    "links": [
+      {
+        "icon": "github",
+        "url": "https://github.com/JBreidfjord/botfjord"
+      },
+      {
+        "icon": "link",
+        "url": "https://lichess.org/@/Botfjord"
+      }
+    ],
+    "langs": ["rust", "python"]
   }
 ]
