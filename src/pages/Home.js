@@ -1,7 +1,7 @@
 import "./Home.css";
 
-import { ReactComponent as GitHub } from "../assets/github.svg";
-import { ReactComponent as LinkedIn } from "../assets/linkedin.svg";
+import { ReactComponent as GitHub } from "../assets/link-icons/github.svg";
+import { ReactComponent as LinkedIn } from "../assets/link-icons/linkedin.svg";
 import Portfolio from "../components/Portfolio";
 
 export default function Home() {

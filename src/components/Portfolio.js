@@ -1,9 +1,15 @@
 import "./Portfolio.css";
 
-import { ReactComponent as GitHub } from "../assets/github.svg";
-import { ReactComponent as Link } from "../assets/link.svg";
+import { ReactComponent as GitHub } from "../assets/link-icons/github.svg";
+import { ReactComponent as JavaScript } from "../assets/lang-icons/javascript.svg";
+import { ReactComponent as Link } from "../assets/link-icons/link.svg";
 import Project from "./Project";
-import { ReactComponent as YouTube } from "../assets/youtube.svg";
+import { ReactComponent as Python } from "../assets/lang-icons/python.svg";
+import { ReactComponent as React } from "../assets/lang-icons/react.svg";
+import { ReactComponent as Rust } from "../assets/lang-icons/rust.svg";
+import { ReactComponent as SQL } from "../assets/lang-icons/sql.svg";
+import { ReactComponent as TypeScript } from "../assets/lang-icons/typescript.svg";
+import { ReactComponent as YouTube } from "../assets/link-icons/youtube.svg";
 import portfolio from "../portfolio.json";
 
 const getIconComponent = (icon) => {
@@ -14,6 +20,18 @@ const getIconComponent = (icon) => {
       return <Link />;
     case "youtube":
       return <YouTube />;
+    case "python":
+      return <Python />;
+    case "react":
+      return <React />;
+    case "rust":
+      return <Rust />;
+    case "sql":
+      return <SQL />;
+    case "javascript":
+      return <JavaScript />;
+    case "typescript":
+      return <TypeScript />;
     default:
       return null;
   }
