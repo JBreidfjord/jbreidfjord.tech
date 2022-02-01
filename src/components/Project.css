@@ -1,18 +1,34 @@
 .portfolio .project {
   background-color: #1a2632;
   margin: 0;
-  padding: 1em;
+  padding: 0 1em;
   border-radius: 0.5em;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
+}
+
+.portfolio .project h3,
+h5 {
+  margin: 0;
+  padding: 0.5em;
 }
 
 .portfolio .project .links {
   margin-top: auto;
+  padding-bottom: 0.5em;
 }
 
 .portfolio .project .links a {
-  padding: 0.1em;
+  padding: 0 0.1em;
+}
+
+.portfolio .project .langs {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.portfolio .project .lang {
+  padding: 0 0.1em;
 }
