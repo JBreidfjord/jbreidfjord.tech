@@ -1,5 +1,21 @@
 [
   {
+    "title": "WiredMinds",
+    "subtitle": "Real-time collaborative circuit editor",
+    "description": "Circuit editor with combinational and sequential logic simulator. Real-time collaboration powered by WebRTC.",
+    "links": [
+      {
+        "icon": "github",
+        "url": "https://github.com/JBreidfjord/wiredminds"
+      },
+      {
+        "icon": "link",
+        "url": "https://apps.jbreidfjord.tech/home"
+      }
+    ],
+    "langs": ["typescript", "react"]
+  },
+  {
     "title": "Evolution Simulation",
     "subtitle": "Neuroevolution in Rust",
     "description": "Implementation of a neural network and genetic algorithm in Rust. Creatures, powered by a neural network, must find food to survive and the strongest reproduce. Over time, the genetic algorithm will train the neural networks to find the best solution.",
