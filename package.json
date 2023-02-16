@@ -19,7 +19,9 @@
     "build": "craco build",
     "build:wasm": "cd game-of-life-rs && wasm-pack build --target web",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "install:rust-toolchain": "curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh",
+    "action:deploy": "npm ci && npm run install:rust-toolchain && npm run build:wasm && npm run build"
   },
   "eslintConfig": {
     "extends": [
