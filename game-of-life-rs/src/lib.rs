@@ -29,11 +29,8 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Universe {
+    pub fn new(width: u32, height: u32) -> Universe {
         utils::set_panic_hook();
-
-        let width = 200;
-        let height = 100;
 
         let cells = (0..width * height)
             .map(|i| {
@@ -154,7 +151,7 @@ impl Universe {
 
 impl Default for Universe {
     fn default() -> Self {
-        Self::new()
+        Self::new(200, 100)
     }
 }
 

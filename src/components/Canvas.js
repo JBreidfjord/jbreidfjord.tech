@@ -41,7 +41,7 @@ export default function Canvas() {
       wasmRef.current = await init();
 
       // Construct the universe, and set the width and height
-      universeRef.current = new Universe();
+      universeRef.current = new Universe(200, 100);
       const canvas = canvasRef.current;
       canvas.height = (CELL_SIZE + GRID_WIDTH) * universeRef.current.height() + 1;
       canvas.width = (CELL_SIZE + GRID_WIDTH) * universeRef.current.width() + 1;
