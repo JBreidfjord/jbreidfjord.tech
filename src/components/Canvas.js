@@ -1,14 +1,17 @@
 import init, { Cell, Universe } from "game-of-life-rs";
 import { useCallback, useEffect, useRef } from "react";
 
+import { GRADIENT } from "./gradient";
+
 const CELL_SIZE = 5; // px
 const GRID_COLOR = "#EEE";
-// const DEAD_COLOR = "#010e1b";
-const DEAD_COLOR = "#FFF";
+const DEAD_COLOR = "#010e1b";
 const ALIVE_COLOR = "#000";
 const COLOR_CHANGE_RATE = 0.5;
 const RENDER_DELAY = 3;
 const GRID_WIDTH = 0;
+
+let renderCount = 0;
 
 export default function Canvas() {
   const requestRef = useRef();
@@ -29,10 +32,14 @@ export default function Canvas() {
       return;
     }
 
-    universeRef.current.tick();
-    drawGrid(ctxRef.current, universeRef.current.width(), universeRef.current.height());
-    drawCells(ctxRef.current, universeRef.current, wasmRef.current.memory);
+    if (renderCount === RENDER_DELAY) {
+      universeRef.current.tick();
+      renderCount = 0;
+      drawGrid(ctxRef.current, universeRef.current.width(), universeRef.current.height());
+      drawCells(ctxRef.current, universeRef.current, wasmRef.current.memory);
+    }
 
+    renderCount++;
     requestRef.current = requestAnimationFrame(animate);
   }, []);
 
@@ -101,7 +108,7 @@ const drawCells = (ctx, universe, memory) => {
         continue;
       }
 
-      // ctx.fillStyle = GRADIENT[Math.floor((cellGens[idx] * COLOR_CHANGE_RATE) % GRADIENT.length)];
+      ctx.fillStyle = GRADIENT[Math.floor((cellGens[idx] * COLOR_CHANGE_RATE) % GRADIENT.length)];
       ctx.fillRect(
         col * (CELL_SIZE + GRID_WIDTH) + 1,
         row * (CELL_SIZE + GRID_WIDTH) + 1,
