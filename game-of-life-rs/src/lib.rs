@@ -1,6 +1,9 @@
 use rand::{Rng, RngCore};
 use wasm_bindgen::prelude::*;
 
+use crate::gradient::{Color, GRADIENT};
+
+mod gradient;
 mod utils;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -26,6 +29,7 @@ pub struct Universe {
     generation: u32,
     cell_generations: Vec<u32>,
     activity: f32,
+    image_data: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -51,6 +55,7 @@ impl Universe {
             generation: 0,
             cell_generations: vec![0; (width * height) as usize],
             activity: 0.0,
+            image_data: vec![0; (width * height * 4) as usize],
         }
     }
 
@@ -79,6 +84,7 @@ impl Universe {
                 generation: 0,
                 cell_generations: vec![0; (width * height) as usize],
                 activity: 0.0,
+                image_data: vec![0; (width * height * 4) as usize],
             };
 
             // Run the universe for `min_lifetime` generations, or until it becomes stagnant
@@ -174,6 +180,25 @@ impl Universe {
         self.activity = active_cells as f32 / (self.width * self.height) as f32;
     }
 
+    pub fn generate_image_data(&mut self) {
+        const COLOR_CHANGE_RATE: f32 = 0.5;
+        const DEAD_COLOR: Color = Color { r: 1, g: 14, b: 27 };
+        for (idx, cell) in self.cells.iter().enumerate() {
+            let color = match cell {
+                Cell::Alive => {
+                    let generation = self.cell_generations[idx];
+                    let color_idx = (generation as f32 * COLOR_CHANGE_RATE) % GRADIENT.len() as f32;
+                    &GRADIENT[color_idx as usize]
+                }
+                Cell::Dead => &DEAD_COLOR,
+            };
+            self.image_data[idx * 4] = color.r;
+            self.image_data[idx * 4 + 1] = color.g;
+            self.image_data[idx * 4 + 2] = color.b;
+            self.image_data[idx * 4 + 3] = 255;
+        }
+    }
+
     pub fn resize(&mut self, width: u32, height: u32) {
         utils::set_panic_hook();
 
@@ -215,6 +240,7 @@ impl Universe {
         self.cells.resize_with(length, || Cell::random(&mut rng));
         self.cell_ages.resize(length, 0);
         self.cell_generations.resize(length, self.generation);
+        self.image_data.resize(length * 4, 0);
 
         self.width = width;
         self.height = height;
@@ -246,6 +272,10 @@ impl Universe {
 
     pub fn activity(&self) -> f32 {
         self.activity
+    }
+
+    pub fn image_data(&self) -> *const u8 {
+        self.image_data.as_ptr()
     }
 
     pub fn toggle_cell(&mut self, row: u32, column: u32) {
