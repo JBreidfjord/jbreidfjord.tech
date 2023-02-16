@@ -1,131 +1,137 @@
 import init, { Cell, Universe } from "game-of-life-rs";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
-import memory from "game-of-life-rs/game_of_life_rs_bg.wasm";
+const CELL_SIZE = 5; // px
+const GRID_COLOR = "#EEE";
+// const DEAD_COLOR = "#010e1b";
+const DEAD_COLOR = "#FFF";
+const ALIVE_COLOR = "#000";
+const COLOR_CHANGE_RATE = 0.5;
+const RENDER_DELAY = 3;
+const GRID_WIDTH = 0;
 
 export default function Canvas() {
   const requestRef = useRef();
-  const previousTimeRef = useRef();
+  const wasmRef = useRef();
   const universeRef = useRef();
+  const canvasRef = useRef();
+  const ctxRef = useRef();
 
-  const animate = (time) => {
-    console.log("Animate");
-    if (previousTimeRef.current !== undefined) {
-      // Call our update function here
+  const animate = useCallback(() => {
+    if (ctxRef.current === undefined) {
+      console.warn("Canvas context not initialized");
+      requestRef.current = requestAnimationFrame(animate);
+      return;
+    }
+    if (universeRef.current === undefined) {
+      console.warn("Universe not initialized");
+      requestRef.current = requestAnimationFrame(animate);
+      return;
     }
 
-    previousTimeRef.current = time;
+    universeRef.current.tick();
+    drawGrid(ctxRef.current, universeRef.current.width(), universeRef.current.height());
+    drawCells(ctxRef.current, universeRef.current, wasmRef.current.memory);
+
     requestRef.current = requestAnimationFrame(animate);
-  };
+  }, []);
 
   useEffect(() => {
-    console.log("Effect");
     const loadWasm = async () => {
-      await init();
+      wasmRef.current = await init();
+
+      // Construct the universe, and set the width and height
       universeRef.current = new Universe();
+      const canvas = canvasRef.current;
+      canvas.height = (CELL_SIZE + GRID_WIDTH) * universeRef.current.height() + 1;
+      canvas.width = (CELL_SIZE + GRID_WIDTH) * universeRef.current.width() + 1;
+      ctxRef.current = canvas.getContext("2d");
+
+      // Draw the grid
+      drawGrid(ctxRef.current, universeRef.current.width(), universeRef.current.height());
+      drawCells(ctxRef.current, universeRef.current, wasmRef.current.memory);
     };
 
     loadWasm();
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
-  }, []);
+  }, [animate]);
 
-  return <canvas id="game-of-life-canvas" />;
+  return <canvas id="game-of-life-canvas" ref={canvasRef} />;
 }
 
-// const CELL_SIZE = 5; // px
-// const GRID_COLOR = "#EEE";
-// const DEAD_COLOR = "#FFF";
-// const COLOR_CHANGE_RATE = 0.5;
-// const RENDER_DELAY = 3;
+const drawGrid = (ctx, width, height) => {
+  if (GRID_WIDTH === 0) return;
 
-// // Construct the universe, and get its width and height
-// const universe = new Universe();
-// const width = universe.width();
-// const height = universe.height();
+  ctx.beginPath();
+  ctx.strokeStyle = GRID_COLOR;
 
-// // Give the canvas room for all of our cells and a 1px border
-// // around each of them
-// const canvas = document.getElementById("game-of-life-canvas");
-// canvas.height = (CELL_SIZE + 1) * height + 1;
-// canvas.width = (CELL_SIZE + 1) * width + 1;
-// const ctx = canvas.getContext("2d");
+  // Vertical lines
+  for (let i = 0; i <= width; i++) {
+    ctx.moveTo(i * (CELL_SIZE + GRID_WIDTH) + 1, 0);
+    ctx.lineTo(i * (CELL_SIZE + GRID_WIDTH) + 1, (CELL_SIZE + GRID_WIDTH) * height + 1);
+  }
 
-// let animationId = null;
-// let renderCount = 0;
-// const renderLoop = () => {
-//   if (renderCount === RENDER_DELAY) {
-//     universe.tick();
-//     renderCount = 0;
-//   }
-//   drawGrid();
-//   drawCells();
+  // Horizontal lines
+  for (let j = 0; j <= height; j++) {
+    ctx.moveTo(0, j * (CELL_SIZE + GRID_WIDTH) + 1);
+    ctx.lineTo((CELL_SIZE + GRID_WIDTH) * width + 1, j * (CELL_SIZE + GRID_WIDTH) + 1);
+  }
 
-//   animationId = requestAnimationFrame(renderLoop);
-//   renderCount++;
-// };
+  ctx.stroke();
+};
 
-// const drawGrid = () => {
-//   ctx.beginPath();
-//   ctx.strokeStyle = GRID_COLOR;
+const drawCells = (ctx, universe, memory) => {
+  const width = universe.width();
+  const height = universe.height();
 
-//   // Vertical lines
-//   for (let i = 0; i <= width; i++) {
-//     ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-//     ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
-//   }
+  const cellsPtr = universe.cells();
+  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+  const cellGensPtr = universe.cell_generations();
+  const cellGens = new Uint32Array(memory.buffer, cellGensPtr, width * height);
 
-//   // Horizontal lines
-//   for (let j = 0; j <= height; j++) {
-//     ctx.moveTo(0, j * (CELL_SIZE + 1) + 1);
-//     ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
-//   }
+  ctx.beginPath();
 
-//   ctx.stroke();
-// };
+  // Alive cells
+  ctx.fillStyle = ALIVE_COLOR;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const idx = getIndex(row, col, width);
+      if (cells[idx] !== Cell.Alive) {
+        continue;
+      }
 
-// const drawCells = () => {
-//   const cellsPtr = universe.cells();
-//   const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
-//   const cellGensPtr = universe.cell_generations();
-//   const cellGens = new Uint32Array(memory.buffer, cellGensPtr, width * height);
+      // ctx.fillStyle = GRADIENT[Math.floor((cellGens[idx] * COLOR_CHANGE_RATE) % GRADIENT.length)];
+      ctx.fillRect(
+        col * (CELL_SIZE + GRID_WIDTH) + 1,
+        row * (CELL_SIZE + GRID_WIDTH) + 1,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
 
-//   ctx.beginPath();
+  // Dead cells
+  ctx.fillStyle = DEAD_COLOR;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const idx = getIndex(row, col, width);
+      if (cells[idx] !== Cell.Dead) {
+        continue;
+      }
 
-//   // Alive cells
-//   ctx.fillStyle = "#000";
-//   for (let row = 0; row < height; row++) {
-//     for (let col = 0; col < width; col++) {
-//       const idx = getIndex(row, col);
-//       if (cells[idx] !== Cell.Alive) {
-//         continue;
-//       }
+      ctx.fillRect(
+        col * (CELL_SIZE + GRID_WIDTH) + 1,
+        row * (CELL_SIZE + GRID_WIDTH) + 1,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
 
-//       // ctx.fillStyle = GRADIENT[Math.floor((cellGens[idx] * COLOR_CHANGE_RATE) % GRADIENT.length)];
-//       ctx.fillRect(col * (CELL_SIZE + 1) + 1, row * (CELL_SIZE + 1) + 1, CELL_SIZE, CELL_SIZE);
-//     }
-//   }
+  ctx.stroke();
+};
 
-//   // Dead cells
-//   ctx.fillStyle = DEAD_COLOR;
-//   for (let row = 0; row < height; row++) {
-//     for (let col = 0; col < width; col++) {
-//       const idx = getIndex(row, col);
-//       if (cells[idx] !== Cell.Dead) {
-//         continue;
-//       }
-
-//       ctx.fillRect(col * (CELL_SIZE + 1) + 1, row * (CELL_SIZE + 1) + 1, CELL_SIZE, CELL_SIZE);
-//     }
-//   }
-
-//   ctx.stroke();
-// };
-
-// const getIndex = (row, column) => {
-//   return row * width + column;
-// };
-
-// drawGrid();
-// drawCells();
-// animationId = requestAnimationFrame(renderLoop);
+const getIndex = (row, column, width) => {
+  return row * width + column;
+};
