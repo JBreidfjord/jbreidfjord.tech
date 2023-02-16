@@ -20,7 +20,12 @@ export default function Canvas() {
 
   useEffect(() => {
     console.log("Effect");
-    // init().then();
+    const loadWasm = async () => {
+      await init();
+      universeRef.current = new Universe();
+    };
+
+    loadWasm();
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
   }, []);
