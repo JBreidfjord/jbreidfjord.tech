@@ -9,6 +9,8 @@ const MIN_START_ACTIVITY = 0.05;
 const MIN_LIFETIME = 200;
 const MIN_ACTIVITY = 0.03;
 
+const maxDimension = Math.max(window.innerWidth, window.innerHeight);
+
 /// Funky pixel background
 // const CELL_SIZE = 4; // px
 // const GRID_COLOR = "#010e1b";
@@ -18,7 +20,7 @@ const MIN_ACTIVITY = 0.03;
 // const GRID_WIDTH = 20;
 
 /// Default
-const CELL_SIZE = 4; // px
+const CELL_SIZE = maxDimension >= 2000 ? 6 : 4; // px
 const GRID_COLOR = "#010e1b";
 const DEAD_COLOR = "#010e1b";
 const COLOR_CHANGE_RATE = 0.5;
@@ -48,7 +50,6 @@ export default function Canvas() {
 
     if (renderCount === RENDER_DELAY) {
       if (needsResize(universeRef.current)) {
-        console.log("Resizing universe");
         const [width, height] = getUniverseDimensions();
         universeRef.current.resize(width, height);
         canvasRef.current.width = (CELL_SIZE + GRID_WIDTH) * universeRef.current.width() + 1;
