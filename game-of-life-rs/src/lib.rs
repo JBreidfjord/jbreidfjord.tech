@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{Rng, RngCore};
 use wasm_bindgen::prelude::*;
 
 mod utils;
@@ -67,13 +67,7 @@ impl Universe {
         // for at least `min_lifetime` generations
         loop {
             let cells: Vec<Cell> = (0..width * height)
-                .map(|_| {
-                    if rng.gen_bool(0.5) {
-                        Cell::Alive
-                    } else {
-                        Cell::Dead
-                    }
-                })
+                .map(|_| Cell::random(&mut rng))
                 .collect();
             let original_cells = cells.clone(); // Store original cells to reset universe
 
@@ -180,6 +174,52 @@ impl Universe {
         self.activity = active_cells as f32 / (self.width * self.height) as f32;
     }
 
+    pub fn resize(&mut self, width: u32, height: u32) {
+        utils::set_panic_hook();
+
+        if width == self.width && height == self.height {
+            return;
+        }
+
+        let mut rng = rand::thread_rng();
+
+        match (self.width, width) {
+            (ow, nw) if ow > nw => {
+                // Retain cells that are within the new width
+                // Boolean mask to select cells within the new width
+                let mask: Vec<bool> = (0..self.cells.len())
+                    .map(|i| i % (self.width as usize) < width as usize)
+                    .collect();
+                let mut iter = mask.iter();
+                self.cells.retain(|_| *iter.next().unwrap());
+                iter = mask.iter();
+                self.cell_ages.retain(|_| *iter.next().unwrap());
+                iter = mask.iter();
+                self.cell_generations.retain(|_| *iter.next().unwrap());
+            }
+            (ow, nw) if ow < nw => {
+                // Add new cells at the end of each row
+                for row in 0..self.height {
+                    for _ in self.width..width {
+                        let idx = (row * width + self.width) as usize;
+                        self.cells.insert(idx, Cell::random(&mut rng));
+                        self.cell_ages.insert(idx, 0);
+                        self.cell_generations.insert(idx, self.generation);
+                    }
+                }
+            }
+            _ => (),
+        }
+
+        let length = (width * height) as usize;
+        self.cells.resize_with(length, || Cell::random(&mut rng));
+        self.cell_ages.resize(length, 0);
+        self.cell_generations.resize(length, self.generation);
+
+        self.width = width;
+        self.height = height;
+    }
+
     pub fn width(&self) -> u32 {
         self.width
     }
@@ -233,6 +273,14 @@ impl Cell {
         *self = match *self {
             Cell::Dead => Cell::Alive,
             Cell::Alive => Cell::Dead,
+        }
+    }
+
+    fn random(rng: &mut dyn RngCore) -> Self {
+        if rng.gen_bool(0.5) {
+            Cell::Alive
+        } else {
+            Cell::Dead
         }
     }
 }

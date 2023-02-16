@@ -25,9 +25,6 @@ const COLOR_CHANGE_RATE = 0.5;
 const RENDER_DELAY = 2;
 const GRID_WIDTH = 0;
 
-const WIDTH = Math.ceil(window.innerWidth / (CELL_SIZE + GRID_WIDTH));
-const HEIGHT = Math.ceil(window.innerHeight / (CELL_SIZE + GRID_WIDTH));
-
 let renderCount = 0;
 
 export default function Canvas() {
@@ -50,10 +47,19 @@ export default function Canvas() {
     }
 
     if (renderCount === RENDER_DELAY) {
+      if (needsResize(universeRef.current)) {
+        console.log("Resizing universe");
+        const [width, height] = getUniverseDimensions();
+        universeRef.current.resize(width, height);
+        canvasRef.current.width = (CELL_SIZE + GRID_WIDTH) * universeRef.current.width() + 1;
+        canvasRef.current.height = (CELL_SIZE + GRID_WIDTH) * universeRef.current.height() + 1;
+      }
+
       universeRef.current.tick();
 
       if (universeRef.current.activity() < MIN_ACTIVITY) {
-        universeRef.current = new Universe(WIDTH, HEIGHT, MIN_LIFETIME, MIN_START_ACTIVITY);
+        const [width, height] = getUniverseDimensions();
+        universeRef.current = new Universe(width, height, MIN_LIFETIME, MIN_START_ACTIVITY);
       }
 
       renderCount = 0;
@@ -70,11 +76,11 @@ export default function Canvas() {
       wasmRef.current = await init();
 
       // Construct the universe, and set the width and height
-      universeRef.current = new Universe(WIDTH, HEIGHT, MIN_LIFETIME, MIN_START_ACTIVITY);
-      const canvas = canvasRef.current;
-      canvas.width = (CELL_SIZE + GRID_WIDTH) * universeRef.current.width() + 1;
-      canvas.height = (CELL_SIZE + GRID_WIDTH) * universeRef.current.height() + 1;
-      ctxRef.current = canvas.getContext("2d");
+      const [width, height] = getUniverseDimensions();
+      universeRef.current = new Universe(width, height, MIN_LIFETIME, MIN_START_ACTIVITY);
+      canvasRef.current.width = (CELL_SIZE + GRID_WIDTH) * universeRef.current.width() + 1;
+      canvasRef.current.height = (CELL_SIZE + GRID_WIDTH) * universeRef.current.height() + 1;
+      ctxRef.current = canvasRef.current.getContext("2d");
 
       // Draw the grid
       drawGrid(ctxRef.current, universeRef.current.width(), universeRef.current.height());
@@ -162,4 +168,15 @@ const drawCells = (ctx, universe, memory) => {
 
 const getIndex = (row, column, width) => {
   return row * width + column;
+};
+
+const getUniverseDimensions = () => {
+  const width = Math.ceil(window.innerWidth / (CELL_SIZE + GRID_WIDTH));
+  const height = Math.ceil(window.innerHeight / (CELL_SIZE + GRID_WIDTH));
+  return [width, height];
+};
+
+const needsResize = (universe) => {
+  const [width, height] = getUniverseDimensions();
+  return universe.width() !== width || universe.height() !== height;
 };
