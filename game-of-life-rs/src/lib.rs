@@ -1,3 +1,4 @@
+use rand::Rng;
 use wasm_bindgen::prelude::*;
 
 mod utils;
@@ -24,11 +25,11 @@ pub struct Universe {
     cell_ages: Vec<u32>,
     generation: u32,
     cell_generations: Vec<u32>,
+    activity: f32,
 }
 
 #[wasm_bindgen]
 impl Universe {
-    #[wasm_bindgen(constructor)]
     pub fn new(width: u32, height: u32) -> Universe {
         utils::set_panic_hook();
 
@@ -49,6 +50,58 @@ impl Universe {
             cell_ages: vec![0; (width * height) as usize],
             generation: 0,
             cell_generations: vec![0; (width * height) as usize],
+            activity: 0.0,
+        }
+    }
+
+    #[wasm_bindgen(constructor)]
+    pub fn new_with_lifetime(
+        width: u32,
+        height: u32,
+        min_lifetime: u32,
+        min_activity: f32,
+    ) -> Universe {
+        let mut rng = rand::thread_rng();
+
+        // Loop until we find a universe that maintains `min_activity`
+        // for at least `min_lifetime` generations
+        loop {
+            let cells: Vec<Cell> = (0..width * height)
+                .map(|_| {
+                    if rng.gen_bool(0.5) {
+                        Cell::Alive
+                    } else {
+                        Cell::Dead
+                    }
+                })
+                .collect();
+            let original_cells = cells.clone(); // Store original cells to reset universe
+
+            let mut universe = Universe {
+                width,
+                height,
+                cells,
+                cell_ages: vec![0; (width * height) as usize],
+                generation: 0,
+                cell_generations: vec![0; (width * height) as usize],
+                activity: 0.0,
+            };
+
+            // Run the universe for `min_lifetime` generations, or until it becomes stagnant
+            for _ in 0..min_lifetime {
+                universe.tick();
+                if universe.activity < min_activity {
+                    break;
+                }
+            }
+
+            // If the universe is stagnant, try again
+            if universe.activity < min_activity {
+                continue;
+            }
+
+            universe.set_cells(&original_cells);
+            return universe;
         }
     }
 
@@ -75,6 +128,7 @@ impl Universe {
 
     pub fn tick(&mut self) {
         let mut next = self.cells.clone();
+        let mut active_cells = 0; // Number of cells that changed state this tick
 
         for row in 0..self.height {
             for col in 0..self.width {
@@ -102,9 +156,15 @@ impl Universe {
                 match (cell, next_cell) {
                     // Cells that came alive this tick should have their generation
                     // set to the current generation
-                    (Cell::Dead, Cell::Alive) => self.cell_generations[idx] = self.generation,
+                    (Cell::Dead, Cell::Alive) => {
+                        self.cell_generations[idx] = self.generation;
+                        active_cells += 1;
+                    }
                     // Cells that died this tick should have their age reset to 0
-                    (Cell::Alive, Cell::Dead) => self.cell_ages[idx] = 0,
+                    (Cell::Alive, Cell::Dead) => {
+                        self.cell_ages[idx] = 0;
+                        active_cells += 1;
+                    }
                     // Cells that are alive should have their age incremented
                     (Cell::Alive, Cell::Alive) => self.cell_ages[idx] += 1,
                     // Otherwise, do nothing
@@ -117,6 +177,7 @@ impl Universe {
 
         self.cells = next;
         self.generation += 1;
+        self.activity = active_cells as f32 / (self.width * self.height) as f32;
     }
 
     pub fn width(&self) -> u32 {
@@ -143,9 +204,21 @@ impl Universe {
         self.cell_generations.as_ptr()
     }
 
+    pub fn activity(&self) -> f32 {
+        self.activity
+    }
+
     pub fn toggle_cell(&mut self, row: u32, column: u32) {
         let idx = self.get_index(row, column);
         self.cells[idx].toggle();
+    }
+
+    fn set_cells(&mut self, cells: &[Cell]) {
+        assert_eq!(cells.len(), (self.width * self.height) as usize);
+        self.cells = cells.to_vec();
+        self.generation = 0;
+        self.cell_ages = vec![0; (self.width * self.height) as usize];
+        self.cell_generations = vec![0; (self.width * self.height) as usize];
     }
 }
 
