@@ -27,3 +27,8 @@
 .home .info-container .links a {
   padding: 0.1em;
 }
+
+.links a .icon {
+  background-color: #010e1b;
+  border-radius: 50%;
+}

@@ -16,10 +16,10 @@ export default function Home() {
           <h4>Software Engineering Student</h4>
           <div className="links">
             <a href="https://github.com/JBreidfjord">
-              <GitHub />
+              <GitHub className="icon" />
             </a>
             <a href="https://www.linkedin.com/in/jbreidfjord/">
-              <LinkedIn />
+              <LinkedIn className="icon" />
             </a>
           </div>
         </div>

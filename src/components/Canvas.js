@@ -1,3 +1,5 @@
+import "./Canvas.css";
+
 import init, { Cell, Universe } from "game-of-life-rs";
 import { useCallback, useEffect, useRef } from "react";
 

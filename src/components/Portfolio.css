@@ -1,5 +1,8 @@
 .portfolio {
   padding: 0 8em 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .portfolio .project-list {
