@@ -5,13 +5,28 @@ import { useCallback, useEffect, useRef } from "react";
 
 import { GRADIENT } from "./gradient";
 
-const CELL_SIZE = 5; // px
-const GRID_COLOR = "#EEE";
+const MIN_START_ACTIVITY = 0.05;
+const MIN_LIFETIME = 200;
+const MIN_ACTIVITY = 0.03;
+
+/// Funky pixel background
+// const CELL_SIZE = 4; // px
+// const GRID_COLOR = "#010e1b";
+// const DEAD_COLOR = "#010e1b";
+// const COLOR_CHANGE_RATE = 0.5;
+// const RENDER_DELAY = 6;
+// const GRID_WIDTH = 20;
+
+/// Default
+const CELL_SIZE = 4; // px
+const GRID_COLOR = "#010e1b";
 const DEAD_COLOR = "#010e1b";
-const ALIVE_COLOR = "#000";
 const COLOR_CHANGE_RATE = 0.5;
-const RENDER_DELAY = 3;
+const RENDER_DELAY = 2;
 const GRID_WIDTH = 0;
+
+const WIDTH = Math.ceil(window.innerWidth / (CELL_SIZE + GRID_WIDTH));
+const HEIGHT = Math.ceil(window.innerHeight / (CELL_SIZE + GRID_WIDTH));
 
 let renderCount = 0;
 
@@ -36,6 +51,11 @@ export default function Canvas() {
 
     if (renderCount === RENDER_DELAY) {
       universeRef.current.tick();
+
+      if (universeRef.current.activity() < MIN_ACTIVITY) {
+        universeRef.current = new Universe(WIDTH, HEIGHT, MIN_LIFETIME, MIN_START_ACTIVITY);
+      }
+
       renderCount = 0;
       drawGrid(ctxRef.current, universeRef.current.width(), universeRef.current.height());
       drawCells(ctxRef.current, universeRef.current, wasmRef.current.memory);
@@ -50,10 +70,10 @@ export default function Canvas() {
       wasmRef.current = await init();
 
       // Construct the universe, and set the width and height
-      universeRef.current = new Universe(200, 100);
+      universeRef.current = new Universe(WIDTH, HEIGHT, MIN_LIFETIME, MIN_START_ACTIVITY);
       const canvas = canvasRef.current;
-      canvas.height = (CELL_SIZE + GRID_WIDTH) * universeRef.current.height() + 1;
       canvas.width = (CELL_SIZE + GRID_WIDTH) * universeRef.current.width() + 1;
+      canvas.height = (CELL_SIZE + GRID_WIDTH) * universeRef.current.height() + 1;
       ctxRef.current = canvas.getContext("2d");
 
       // Draw the grid
@@ -102,7 +122,6 @@ const drawCells = (ctx, universe, memory) => {
   ctx.beginPath();
 
   // Alive cells
-  ctx.fillStyle = ALIVE_COLOR;
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const idx = getIndex(row, col, width);
