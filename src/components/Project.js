@@ -15,7 +15,7 @@ export default function Project({ project, getIconComponent }) {
       <p>{project.description}</p>
       <div className="links">
         {project.links.map((link, i) => (
-          <a href={link.url} key={i}>
+          <a href={link.url} key={i} target="_blank" rel="noreferrer">
             {getIconComponent(link.icon)}
           </a>
         ))}
