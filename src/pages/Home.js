@@ -15,10 +15,10 @@ export default function Home() {
           <h2>Jonathan Breidfjord</h2>
           <h4>Software Engineering Student</h4>
           <div className="links">
-            <a href="https://github.com/JBreidfjord">
+            <a href="https://github.com/JBreidfjord" target="_blank" rel="noreferrer">
               <GitHub className="icon" />
             </a>
-            <a href="https://www.linkedin.com/in/jbreidfjord/">
+            <a href="https://www.linkedin.com/in/jbreidfjord/" target="_blank" rel="noreferrer">
               <LinkedIn className="icon" />
             </a>
           </div>
