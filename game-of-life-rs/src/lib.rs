@@ -2,6 +2,7 @@ use rand::{Rng, RngCore};
 use wasm_bindgen::prelude::*;
 
 use crate::gradient::{Color, GRADIENT};
+use crate::utils::log;
 
 mod gradient;
 mod utils;
@@ -180,18 +181,46 @@ impl Universe {
         self.activity = active_cells as f32 / (self.width * self.height) as f32;
     }
 
-    pub fn generate_image_data(&mut self) {
+    pub fn generate_image_data(&mut self, cell_spacing: u32) {
         const COLOR_CHANGE_RATE: f32 = 0.5;
         const DEAD_COLOR: Color = Color { r: 1, g: 14, b: 27 };
-        for (idx, cell) in self.cells.iter().enumerate() {
-            let color = match cell {
-                Cell::Alive => {
-                    let generation = self.cell_generations[idx];
-                    let color_idx = (generation as f32 * COLOR_CHANGE_RATE) % GRADIENT.len() as f32;
-                    &GRADIENT[color_idx as usize]
-                }
-                Cell::Dead => &DEAD_COLOR,
-            };
+        const PADDING_COLOR: Color = Color { r: 1, g: 14, b: 27 };
+
+        let pad = |value: u32, padding: u32| padding * value + padding + value;
+
+        // Calculate the width and height of the padded image
+        let padded_width = pad(self.width, cell_spacing);
+        let padded_height = pad(self.height, cell_spacing);
+
+        // Resize the image data vector to the padded size
+        self.image_data
+            .resize((padded_width * padded_height * 4) as usize, 0);
+
+        let mut colors = vec![&PADDING_COLOR; (padded_width * padded_height) as usize];
+        for row in 0..self.height {
+            for col in 0..self.width {
+                // Calculate the position of the cell in the padded image
+                let padded_col = pad(col, cell_spacing);
+                let padded_row = pad(row, cell_spacing);
+
+                // Set the color of the cell
+                let idx = self.get_index(row, col);
+                let color = match self.cells[idx] {
+                    Cell::Alive => {
+                        let generation = self.cell_generations[idx];
+                        let color_idx = ((generation as f32 * COLOR_CHANGE_RATE)
+                            % GRADIENT.len() as f32)
+                            .floor() as usize;
+                        &GRADIENT[color_idx]
+                    }
+                    Cell::Dead => &DEAD_COLOR,
+                };
+                let padded_idx = (padded_row * padded_width + padded_col) as usize;
+                colors[padded_idx] = color;
+            }
+        }
+
+        for (idx, color) in colors.iter().enumerate() {
             self.image_data[idx * 4] = color.r;
             self.image_data[idx * 4 + 1] = color.g;
             self.image_data[idx * 4 + 2] = color.b;
@@ -200,8 +229,6 @@ impl Universe {
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
-        utils::set_panic_hook();
-
         if width == self.width && height == self.height {
             return;
         }
