@@ -10,7 +10,7 @@ export default function Home() {
     <div className="home">
       <Canvas />
       <div className="info-container">
-        <img className="headshot" src="assets/images/headshot.png" alt="Headshot" />
+        <img className="headshot" src="assets/images/headshot.webp" alt="Headshot" />
         <div className="info">
           <h2>Jonathan Breidfjord</h2>
           <h4>Software Engineer</h4>
