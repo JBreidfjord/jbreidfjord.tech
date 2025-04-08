@@ -13,7 +13,7 @@ export default function Home() {
         <img className="headshot" src="assets/images/headshot.png" alt="Headshot" />
         <div className="info">
           <h2>Jonathan Breidfjord</h2>
-          <h4>Software Engineering Student</h4>
+          <h4>Software Engineer</h4>
           <div className="links">
             <a href="https://github.com/JBreidfjord" target="_blank" rel="noreferrer">
               <GitHub className="icon" />
